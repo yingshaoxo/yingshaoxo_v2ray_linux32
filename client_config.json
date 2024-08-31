@@ -1,0 +1,251 @@
+{
+  "dns": {
+    "hosts": {
+      "domain:googleapis.cn": "googleapis.com",
+      "domain:local.pornhub.com": "192.168.2.66"
+    },
+    "servers": [
+      "1.1.1.1",
+      {
+        "address": "8.8.8.8",
+        "domains": [
+          "geosite:cn"
+        ],
+        "expectIPs": [
+          "geoip:cn"
+        ],
+        "port": 53
+      }
+    ]
+  },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 10807,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "userLevel": 8
+      },
+      "tag": "socks"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 10808,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "userLevel": 8
+      },
+      "tag": "tun2socks"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 10809,
+      "protocol": "http",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "tag": "http"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 10810,
+      "protocol": "vmess",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "clients": [
+          {
+            "id": "fe186f9d-2e99-37a2-b30f-252d11337dc2",
+            "alterId": 0,
+            "security": "none"
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws"
+      },
+      "mux": {
+        "enabled": true
+      }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 22245,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "network": "tcp,udp",
+        "followRedirect": true
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    }
+  ],
+  "log": {
+    "loglevel": "warning"
+  },
+  "outbounds": [
+    {
+      "mux": {
+        "concurrency": 8,
+        "enabled": false
+      },
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "14.202.109.163",
+            "port": 1314,
+            "users": [
+              {
+                "alterId": 0,
+                "encryption": "",
+                "flow": "",
+                "id": "fe786f9d-8e99-47a2-b30f-252d11337dc6",
+                "level": 8,
+                "security": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "",
+        "wsSettings": {
+          "headers": {
+            "Host": ""
+          },
+          "path": ""
+        }
+      },
+      "tag": "proxy_0"
+    },
+    {
+        "protocol": "socks",
+        "settings": {
+            "servers": [
+                {
+                    "address": "14.202.109.163",
+                    "port": 1080,
+                    "users": [
+                        {
+                            "user": "admin",
+                            "pass": "admin"
+                        }
+                    ]
+                }
+            ]
+        },
+      "tag": "proxy"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      },
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {
+        "response": {
+          "type": "http"
+        }
+      },
+      "tag": "block"
+    }
+  ],
+  "routing": {
+    "domainMatcher": "mph",
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+         "type": "field",
+         "outboundTag": "direct",
+         "protocol": [
+           "bittorrent"
+         ]
+      },
+      {
+        "ip": [
+          "8.8.8.8"
+        ],
+        "outboundTag": "direct",
+        "port": "53",
+        "type": "field"
+      },
+      {
+        "ip": [
+          "1.1.1.1"
+        ],
+        "outboundTag": "proxy",
+        "port": "53",
+        "type": "field"
+      },
+      {
+        "ip": [
+          "geoip:us"
+        ],
+        "outboundTag": "proxy",
+        "type": "field"
+      },
+      {
+        "ip": [
+            "14.202.109.163"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "domain": [
+            "qq.com",
+            "bing.com"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "domain": [
+            "a_not_exists_website.fuck.com"
+        ],
+        "outboundTag": "proxy_0",
+        "type": "field"
+      },
+      {
+        "outboundTag": "block",
+         "protocol": [
+           "tcp",
+           "udp"
+         ],
+        "type": "field"
+      }
+    ]
+  }
+}

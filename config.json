@@ -1,0 +1,105 @@
+{
+  "log": {
+    "access": "/var/tmp/v2ray_access.log",
+    "error": "/var/tmp/v2ray_error.log",
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "listen": "0.0.0.0",
+      "port": 1314,
+      "protocol": "vmess",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "settings": {
+        "clients": [
+          {
+            "id": "fe786f9d-8e99-47a2-b30f-252d11337dc6",
+            "alterId": 0,
+            "security": "none"
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws"
+      },
+      "mux": {
+        "enabled": true
+      }
+    },
+    {
+      "listen": "0.0.0.0",
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "password",
+		"accounts":[
+		  {
+			"user": "admin",
+			"pass": "admin"	   
+		  }
+		],
+        "udp": true,
+        "userLevel": 8
+      },
+      "tag": "socks"
+    },
+    {
+      "listen": "0.0.0.0",
+      "port": 10808,
+      "protocol": "http",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "tag": "http"
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "freedom"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "blackhole"
+    }
+  ],
+  "dns": {
+    "servers": [
+      "8.8.8.8",
+      "8.8.4.4",
+      "localhost"
+    ]
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "settings": {
+      "rules": [
+        {
+          "type": "field",
+          "outboundTag": "blackhole",
+          "ip": [
+            "geoip:private"
+          ]
+        },
+        {
+          "type": "field",
+          "outboundTag": "blackhole",
+          "protocol": [
+            "bittorrent"
+          ]
+        }
+      ]
+    }
+  }
+}
